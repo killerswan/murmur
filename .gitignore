@@ -1,0 +1,11 @@
+*.swp
+*.exe
+*~
+*.o
+*.tmp
+*.so
+reference/mm3
+test
+notes/
+
+
