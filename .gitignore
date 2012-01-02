@@ -6,6 +6,7 @@
 *.so
 reference/mm3
 test
+test.old
 notes/
 
 
