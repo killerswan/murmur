@@ -54,8 +54,13 @@ fn murmur(&&key_: str) -> [u64] {
    }
 
    #[test]
-   fn test_conversion_u8to64 () {
-      //let XXXX = convert_u8to64 ([1u8,2u8]);
+   #[should_fail]
+   fn test1_conversion_u8to64 () {
+      let XXXX = convert_u8to64 ([1u8,2u8]);
+   }
+
+   #[test]
+   fn test2_conversion_u8to64 () {
       let aa = [255u8,0u8,8u8,0u8, 20u8,0u8,0u8,1u8];
       std::io::println(#fmt("converted: %016x", convert_eight_u8_to_one_u64 (aa)));
    }
@@ -91,6 +96,7 @@ fn murmur(&&key_: str) -> [u64] {
          ret ys;
       }
 
+      // PENDING A
       let bbs = splitEvery(8u, bb);
       ret vec::map ( bbs, {|xs|
          convert_eight_u8_to_one_u64(xs)
@@ -111,7 +117,10 @@ fn murmur(&&key_: str) -> [u64] {
       ret kk;
    }
 
-
+   // PENDING B
+   // what the original does is process the full size blocks as if they're u64
+   // then takes the leftovers and twiddle those bytes
+   // so i need to change things
    let blocks = convert_u8to64 ([0u8,0u8,0u8,0u8, 0u8,0u8,0u8,0u8, 0u8,0u8,0u8,0u8, 0u8,0u8,0u8,0u8]); 
    
 
