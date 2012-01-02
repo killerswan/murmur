@@ -57,17 +57,20 @@ fn hash_test ( test_label: str,
       }
    });
 
-   std::io::println (#fmt("%u/%u pairs failed", pairsFailed, pairsTotal));
+   std::io::println ( #fmt(
+      "%u/%u pairs failed\n", pairsFailed, pairsTotal));
 }
 
 
 // main
 fn main () {
+   std::io::println ("");
+
    hash_test ("Testing dummy_hash...",
-              {|_x| "ABCD"}, "./reference/test_dummy_hash.txt");
+              {|_x| "ABCD"}, "./reference/dummy.tests");
 
    hash_test ("Testing murmur3...",
-              murmur::murmur_str, "./reference/test_dummy_hash.txt");
+              murmur::murmur_str, "./reference/murmur3_x64_128.tests");
 }
 
 
