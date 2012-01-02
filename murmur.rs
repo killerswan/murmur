@@ -1,36 +1,124 @@
 // Kevin Cantu
 // replace djb with murmur
-// https://github.com/graydon/rust/blob/master/src/libcore/str.rs at ll. 43-50
+
 
 use std;
-import std::io;
 
-fn displayHash(label: str,
-               hf: fn(&&str)->uint,
-               ss: str
-              ) {
-   io::println (#fmt ("%s: \"%s\" -> %u", label, ss, hf(ss) ) );
+
+fn djb(&&ss: str) -> uint {
+   // default str::hash
+   // https://github.com/graydon/rust/blob/master/src/libcore/str.rs at ll. 43-50
+   let uu: uint = 5381u;
+   for cc: u8 in ss { uu *= 33u; uu += cc as uint; }
+   ret uu;
 }
 
-fn djb(&&s: str) -> uint {
-   let u: uint = 5381u;
-   for c: u8 in s { u *= 33u; u += c as uint; }
-   ret u;
+
+// translate to hex
+fn murmur_str(&&ss: str) -> str {
+   let mm = murmur(ss);
+   ret #fmt("%016x%016x", mm[0], mm[1]);
 }
 
-fn murmur(&&s: str) -> uint {
-   ret 1u;
-}
 
-fn murmur_str(&&s: str) -> str {
-   ret "ABCD";
-}
+// murmur3 x64 128-bit
+fn murmur(&&key_: str) -> [u64] {
 
-fn main () {
-   let ss = "banana";
+   let key = str::bytes (key_);
+   let data = key;
+   let len = vec::len(key);
+   let nblocks = len / 16u;
 
-   displayHash("djb   ", djb, ss);
-   displayHash("murmur", murmur, ss);
+   // TODO: random seeds
+   let seed = 0u64;
+   let hh = [seed,seed];
+
+   let cc = [ 0x_87c37b91114253d5_u64,
+              0x_4cf5ad432745937f_u64 ];
+
+   
+   // rotation left
+   fn rotl64 (x: u64, r: u64) -> u64 {
+      ret (x << r) | (x >> (64u-r));
+   }
+
+
+   // conversion from 8 to 64 bits
+   pure fn isEight (bytes: [u8]) -> bool {
+      ret vec::len(bytes) == 8u;
+   }
+
+   fn convert_eight_u8_to_one_u64 (bb: [u8]) -> u64 {
+      check isEight(bb);
+      ret vec::foldl(0u64, bb, {|w, b| (w << 8u) + (b as u64)});
+   }
+
+   #[test]
+   fn test_conversion_u8to64 () {
+      //let XXXX = convert_u8to64 ([1u8,2u8]);
+      let aa = [255u8,0u8,8u8,0u8, 20u8,0u8,0u8,1u8];
+      std::io::println(#fmt("converted: %016x", convert_eight_u8_to_one_u64 (aa)));
+   }
+
+   fn convert_u8to64 (bb: [u8]) -> [u64] {
+      fn lesser <copy TT> (aa: TT, bb: TT) -> TT {
+         if aa < bb { aa } else { bb }
+      }
+
+      // windowing
+      fn windowed <copy TT> (nn: uint, xs: [TT]) -> [[TT]] {
+         let ws: [[TT]] = [];
+         vec::iteri (xs, {|ii, x|
+            let len: uint = vec::len(xs);
+            if ii+(nn) < len {
+               let w: [TT] = vec::slice ( xs, ii, ii+nn );
+               vec::push (ws, w);
+            }
+         });
+         ret ws;
+      }
+
+      // split into vector^2
+      fn splitEvery <copy TT> (nn: uint, xs: [TT]) -> [[TT]] {
+         let ys: [[TT]] = [];
+         vec::iteri (xs, {|ii, x|
+            let len = vec::len(xs);
+            if ii % nn == 0u && ii < len {
+               let y = vec::slice (xs, ii, lesser(nn+ii, len));
+               vec::push (ys, y);
+            }
+         });
+         ret ys;
+      }
+
+      let bbs = splitEvery(8u, bb);
+      ret vec::map ( bbs, {|xs|
+         convert_eight_u8_to_one_u64(xs)
+      });
+   }
+   
+
+   // fmix
+   fn fmix (k_: u64) -> u64 {
+      let kk = k_;
+
+      kk ^= kk >> 33u;
+      kk *= 0x_ff51afd7ed558ccd_u64;
+      kk ^= kk >> 33u;
+      kk *= 0x_c4ceb9fe1a85ec53_u64;
+      kk ^= kk >> 33u;
+
+      ret kk;
+   }
+
+
+   let blocks = convert_u8to64 ([0u8,0u8,0u8,0u8, 0u8,0u8,0u8,0u8, 0u8,0u8,0u8,0u8, 0u8,0u8,0u8,0u8]); 
+   
+
+
+
+   // TODO: truncate to u64 for djb replacement
+   ret [1u64, 1u64];
 }
 
 

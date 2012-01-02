@@ -1,2 +1,2 @@
-rustc --lib murmur.rs
-rustc test.rs -o test -L .
+rustc --lib murmur.rs \
+&& rustc test.rs -o test -L .
