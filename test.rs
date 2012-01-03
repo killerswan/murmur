@@ -50,9 +50,9 @@ fn hash_test ( test_label: str,
       if val != val_ {
          pairsFailed += 1u;
 
-         std::io::println (#fmt("expected \"%s\"",  key ));
-         std::io::println (#fmt("         -> 0x%s", val ));
-         std::io::println (#fmt("        not 0x%s", val_));
+         std::io::println (#fmt("For \"%s\" -> ",  key ));
+         std::io::println (#fmt("   expected: 0x%s", val ));
+         std::io::println (#fmt("   not:      0x%s", val_));
       }
    });
 

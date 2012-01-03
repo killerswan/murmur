@@ -15,7 +15,7 @@ fn djb(&&ss: str) -> uint {
 // translate to hex
 fn murmur_str(&&ss: str) -> str {
    let mm = murmur(ss);
-   ret #fmt("%016x%016x", mm[0u], mm[1u]);
+   ret #fmt("%016X%016X", mm[0u], mm[1u]);
 }
 
 // murmur3 x64 128-bit
