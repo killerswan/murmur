@@ -56,8 +56,14 @@ fn hash_test ( test_label: str,
       }
    });
 
-   std::io::println ( #fmt(
-      "%u/%u pairs failed\n", pairsFailed, pairsTotal));
+   if pairsFailed > 0u {
+      std::io::println ( #fmt(
+         "%u/%u pairs failed\n", pairsFailed, pairsTotal));
+   } else {
+      std::io::println ( #fmt(
+         "%u pairs OK\n", pairsTotal));
+      
+   }
 }
 
 

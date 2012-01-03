@@ -22,6 +22,7 @@ fn murmur_str(&&ss: str) -> str {
 fn murmur(&&key_: str) -> [u64] {
 
    let key = str::bytes (key_);
+   //std::io::println("key: "  + vec2::show(key,  {|b| #fmt("%02X", b as uint)}));
 
    // TODO: random seeds
    let seed = 0u64;
@@ -45,7 +46,9 @@ fn murmur(&&key_: str) -> [u64] {
 
    fn convert_eight_u8_to_one_u64 (bb: [u8]) -> u64 {
       check isEight(bb);
-      ret vec::foldl(0u64, bb, {|w, b| (w << 8u) + (b as u64)});
+      let bb_ = vec::reversed(bb);  // apparently rust doesn't have the same
+                                    // endianness problem as C++ does
+      ret vec::foldl(0u64, bb_, {|w, b| (w << 8u) + (b as u64)});
    }
 
    #[test]
@@ -109,11 +112,13 @@ fn murmur(&&key_: str) -> [u64] {
    let (body_, tail) = vec2::splitAt (nblocks*16u, key);
    let body: [u64] = convert_u8to64 (body_);
 
-   fn apply_constants_A (rot: u64, 
-                         kk: u64,
-                         h: u64, 
-                         c: u64,
-                         c_: u64) -> u64 {
+
+   fn apply_constants (rot: u64, 
+                       kk: u64,
+                       h: u64, 
+                       c: u64,
+                       c_: u64) -> u64 {
+
       let k = kk;
       k *= c;
       k  = rotl64(k, rot);
@@ -124,10 +129,12 @@ fn murmur(&&key_: str) -> [u64] {
    // crunch body data
    fn do_body (blocks: [u64],
                nblocks: uint,
-               h1: u64,
-               h2: u64,
+               h1_: u64,
+               h2_: u64,
                c1: u64,
                c2: u64) -> (u64,u64) {
+      let h1 = h1_;
+      let h2 = h2_;
 
       let ii = 0u;
       assert nblocks % 2u == 0u;
@@ -136,18 +143,17 @@ fn murmur(&&key_: str) -> [u64] {
          let k1 = blocks[ii*2u + 0u];
          let k2 = blocks[ii*2u + 1u];
 
-         let h1 = apply_constants_A (31u64, k1, h1, c1, c2);
+         h1 = apply_constants (31u64, k1, h1, c1, c2);
 
          h1 = rotl64(h1, 27u64);
          h1 += h2;
          h1 = h1*5u64 + 0x_52dce729_u64;
 
-         let h2 = apply_constants_A (33u64, k2, h2, c2, c1);
+         h2 = apply_constants (33u64, k2, h2, c2, c1);
 
          h2 = rotl64(h2, 31u64);
          h2 += h1;
          h2 = h2*5u64 + 0x_38495ab5_u64;
-
 
          ii += 1u;
       }
@@ -155,7 +161,6 @@ fn murmur(&&key_: str) -> [u64] {
       ret (h1, h2);
    }
 
-   let (h1,h2) = do_body (body, nblocks, h1, h2, c1, c2);
 
 
    // tail
@@ -163,19 +168,19 @@ fn murmur(&&key_: str) -> [u64] {
       let tail = tail_;
       vec::grow(tail, 16u - vec::len(tail), 0u8);
       assert vec::len(tail) == 16u;
-      let jj = vec::reversed (tail);
+      //let jj = vec::reversed (tail);
+      let jj = tail; // don't need to flip...
       let jj_ = convert_u8to64 (jj);
       assert vec::len(jj_) == 2u;
-      let j1 = jj_[1u]; // reversing
-      let j2 = jj_[0u]; // reversing
+      let j1 = jj_[0u]; // reversing
+      let j2 = jj_[1u]; // reversing
 
 
-      let h2_ = apply_constants_A (33u64, j2, h2, c2, c1);
-      let h1_ = apply_constants_A (31u64, j1, h1, c1, c2);
+      let h2_ = apply_constants (33u64, j2, h2, c2, c1);
+      let h1_ = apply_constants (31u64, j1, h1, c1, c2);
       ret (h1_,h2_);
    }
 
-   let (h1,h2) = do_tail (tail, h1, h2, c1, c2);
    
 
    // finalization
@@ -198,10 +203,12 @@ fn murmur(&&key_: str) -> [u64] {
       ret (h1, h2);
    }
    
+
+   let (h1, h2) = do_body (body, nblocks, h1, h2, c1, c2);
+   let (h1, h2) = do_tail (tail, h1, h2, c1, c2);
    let (h1, h2) = finalize (h1, h2, nbytes);
 
    ret [h1, h2];
-   //ret test2;
 }
 
 
