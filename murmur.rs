@@ -58,7 +58,7 @@ fn murmur(&&key_: str) -> [u64] {
    fn test2_conversion_u8to64 () {
       let aa = [255u8,0u8,8u8,0u8, 20u8,0u8,0u8,1u8];
       std::io::println(#fmt("converted: %016x", convert_eight_u8_to_one_u64 (aa)));
-      let test2 = convert_u8to64 (aa+aa);
+      let _test2 = convert_u8to64 (aa+aa);
    }
 
    fn convert_u8to64 (bb: [u8]) -> [u64] {
@@ -106,75 +106,99 @@ fn murmur(&&key_: str) -> [u64] {
    // split body data and tail
    let nbytes  = vec::len(key);
    let nblocks = nbytes / 16u;
-   let (blocks_, tail) = vec2::splitAt (nblocks*16u, key);
-   let blocks: [u64] = convert_u8to64 (blocks_);
+   let (body_, tail) = vec2::splitAt (nblocks*16u, key);
+   let body: [u64] = convert_u8to64 (body_);
 
+   fn apply_constants_A (rot: u64, 
+                         kk: u64,
+                         h: u64, 
+                         c: u64,
+                         c_: u64) -> u64 {
+      let k = kk;
+      k *= c;
+      k  = rotl64(k, rot);
+      k *= c_;
+      ret h ^ k;
+   }
 
    // crunch body data
-   let ii = 0u;
-   assert nblocks % 2u == 0u;
-   while (ii < nblocks) {
+   fn do_body (blocks: [u64],
+               nblocks: uint,
+               h1: u64,
+               h2: u64,
+               c1: u64,
+               c2: u64) -> (u64,u64) {
 
-      let k1 = blocks[ii*2u+0u];
-      let k2 = blocks[ii*2u+1u];
+      let ii = 0u;
+      assert nblocks % 2u == 0u;
+      while (ii < nblocks) {
 
-      k1 *= c1;
-      k1 = rotl64(k1, 31u64);
-      k1 *= c2;
-      h1 ^= k1;
+         let k1 = blocks[ii*2u + 0u];
+         let k2 = blocks[ii*2u + 1u];
 
-      h1 = rotl64(h1, 27u64);
-      h1 += h2;
-      h1 = h1*5u64 + 0x_52dce729_u64;
+         let h1 = apply_constants_A (31u64, k1, h1, c1, c2);
 
-      k2 *= c2;
-      k2 = rotl64(k2, 33u64);
-      k2 *= c1;
-      h2 ^= k2;
+         h1 = rotl64(h1, 27u64);
+         h1 += h2;
+         h1 = h1*5u64 + 0x_52dce729_u64;
 
-      h2 = rotl64(h2, 31u64);
-      h2 += h1;
-      h2 = h2*5u64 + 0x_38495ab5_u64;
+         let h2 = apply_constants_A (33u64, k2, h2, c2, c1);
+
+         h2 = rotl64(h2, 31u64);
+         h2 += h1;
+         h2 = h2*5u64 + 0x_38495ab5_u64;
 
 
-      ii += 1u;
+         ii += 1u;
+      }
+
+      ret (h1, h2);
    }
+
+   let (h1,h2) = do_body (body, nblocks, h1, h2, c1, c2);
 
 
    // tail
-   vec::grow(tail, 16u - vec::len(tail), 0u8);
-   assert vec::len(tail) == 16u;
-   let jj = vec::reversed (tail);
-   let jj_ = convert_u8to64 (jj);
-   assert vec::len(jj_) == 2u;
-   let j1 = jj_[1u]; // reversing
-   let j2 = jj_[0u]; // reversing
+   fn do_tail (tail_: [u8], h1: u64, h2: u64, c1: u64, c2: u64) -> (u64,u64) { 
+      let tail = tail_;
+      vec::grow(tail, 16u - vec::len(tail), 0u8);
+      assert vec::len(tail) == 16u;
+      let jj = vec::reversed (tail);
+      let jj_ = convert_u8to64 (jj);
+      assert vec::len(jj_) == 2u;
+      let j1 = jj_[1u]; // reversing
+      let j2 = jj_[0u]; // reversing
 
-   j2 *= c2;
-   j2 = rotl64(j2, 33u);
-   j2 *= c1;
-   h2 ^= j2;
 
-   j1 *= c1;
-   j1 = rotl64(j1, 31u);
-   j1 *= c2;
-   h1 ^= j1;
+      let h2_ = apply_constants_A (33u64, j2, h2, c2, c1);
+      let h1_ = apply_constants_A (31u64, j1, h1, c1, c2);
+      ret (h1_,h2_);
+   }
+
+   let (h1,h2) = do_tail (tail, h1, h2, c1, c2);
    
 
    // finalization
+   fn finalize (h1_: u64, h2_: u64, len: uint) -> (u64,u64) {
+      let h1 = h1_;
+      let h2 = h2_;
 
-   h1 ^= nbytes;
-   h2 ^= nbytes;
+      h1 ^= len as u64;
+      h2 ^= len as u64;
 
-   h1 += h2;
-   h2 += h1;
+      h1 += h2;
+      h2 += h1;
    
-   h1 = fmix(h1);
-   h2 = fmix(h2);
+      h1 = fmix(h1);
+      h2 = fmix(h2);
 
-   h1 += h2;
-   h2 += h1;
+      h1 += h2;
+      h2 += h1;
    
+      ret (h1, h2);
+   }
+   
+   let (h1, h2) = finalize (h1, h2, nbytes);
 
    ret [h1, h2];
    //ret test2;
