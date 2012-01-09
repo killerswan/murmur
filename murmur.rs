@@ -65,12 +65,12 @@ fn murmur(&&key_: str) -> [u64] {
    }
 
    fn convert_u8to64 (bb: [u8]) -> [u64] {
-      fn lesser <copy TT> (aa: TT, bb: TT) -> TT {
+      fn lesser <TT: copy> (aa: TT, bb: TT) -> TT {
          if aa < bb { aa } else { bb }
       }
 
       // split into vector^2
-      fn splitEvery <copy TT> (nn: uint, xs: [TT]) -> [[TT]] {
+      fn splitEvery <TT: copy> (nn: uint, xs: [TT]) -> [[TT]] {
          let ys: [[TT]] = [];
 
          vec::iteri (xs, {|ii, _x|
