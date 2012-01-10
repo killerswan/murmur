@@ -51,19 +51,6 @@ fn murmur(&&key_: str) -> [u64] {
       ret vec::foldl(0u64, bb_, {|w, b| (w << 8u) + (b as u64)});
    }
 
-   #[test]
-   #[should_fail]
-   fn test1_conversion_u8to64 () {
-      let _XXXX = convert_u8to64 ([1u8,2u8]);
-   }
-
-   #[test]
-   fn test2_conversion_u8to64 () {
-      let aa = [255u8,0u8,8u8,0u8, 20u8,0u8,0u8,1u8];
-      std::io::println(#fmt("converted: %016x", convert_eight_u8_to_one_u64 (aa)));
-      let _test2 = convert_u8to64 (aa+aa);
-   }
-
    fn convert_u8to64 (bb: [u8]) -> [u64] {
       fn lesser <TT: copy> (aa: TT, bb: TT) -> TT {
          if aa < bb { aa } else { bb }
@@ -137,7 +124,9 @@ fn murmur(&&key_: str) -> [u64] {
       let h2 = h2_;
 
       let ii = 0u;
-      assert nblocks % 2u == 0u;
+
+      //std::io::println(#fmt("nblocks: %u", nblocks));
+
       while (ii < nblocks) {
 
          let k1 = blocks[ii*2u + 0u];
@@ -181,8 +170,6 @@ fn murmur(&&key_: str) -> [u64] {
       ret (h1_,h2_);
    }
 
-   
-
    // finalization
    fn finalize (h1_: u64, h2_: u64, len: uint) -> (u64,u64) {
       let h1 = h1_;
@@ -203,7 +190,6 @@ fn murmur(&&key_: str) -> [u64] {
       ret (h1, h2);
    }
    
-
    let (h1, h2) = do_body (body, nblocks, h1, h2, c1, c2);
    let (h1, h2) = do_tail (tail, h1, h2, c1, c2);
    let (h1, h2) = finalize (h1, h2, nbytes);

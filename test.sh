@@ -1,3 +1,3 @@
 rm *.so
 rm test
-./build.sh && ./test
+./build.sh && ./test && ./bench

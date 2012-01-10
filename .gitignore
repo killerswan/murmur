@@ -6,6 +6,8 @@
 *.so
 reference/mm3
 test
+bench
+bench.old
 test.old
 notes/
 
