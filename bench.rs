@@ -37,7 +37,7 @@ fn main () {
 
    hash_bench ("Benching dummy_hash...  ", {|_x| "ABCD"},      meow);
    hash_bench ("Benching djb...         ", murmur::djb,        meow);
-   hash_bench ("Benching murmur3...     ", murmur::murmur_str, meow);
+   hash_bench ("Benching murmur3...     ", murmur::murmur, meow);
 }
 
 
