@@ -1,6 +1,8 @@
 // Kevin Cantu
 // replace djb with murmur
 
+#[link(name = "murmur", author = "kcantu", vers = "0.1")];
+
 use std;
 use vec2;
 
