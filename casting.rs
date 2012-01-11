@@ -10,18 +10,20 @@ use vec2;
 #[test]
 fn casting_test () {
    fn messy () unsafe {
+      // casting u8 to u32
+      fn u8to32 (aa: [u8]) -> [u32] unsafe
+      {
+         assert vec::len(aa) % 4u == 0u;
+         let bb: *u8 = vec::unsafe::to_ptr(aa);
+         let cc: *u32 = unsafe::reinterpret_cast(bb);
+         let dd: [u32] = vec::unsafe::from_buf(cc, 2u);
+         ret dd;
+      }
 
       let aa: [u8] = [1u8, 2u8,3u8,4u8, 5u8,6u8,7u8,8u8];
-      
+
       std::io::println("BEFORE(aa): " + vec2::show(aa, {|num| #fmt("0x%02x", num as uint)}));
-
-      // casting u8 to u32
-      assert vec::len(aa) % 4u == 0u;
-      let bb: *u8 = vec::unsafe::to_ptr(aa);
-      let cc: *u32 = unsafe::reinterpret_cast(bb);
-      let dd: [u32] = vec::unsafe::from_buf(cc, 2u);
-      // end
-
+      let dd = u8to32(aa);
       std::io::println("AFTER (dd): " + vec2::show(dd, {|num| #fmt("0x%08x", num as uint)}));
    }
 

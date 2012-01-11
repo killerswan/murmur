@@ -13,13 +13,15 @@ fn djb(&&ss: str) -> uint {
 }
 
 // translate to hex
-fn murmur_str(&&ss: str) -> str {
-   let mm = murmur(ss);
+fn naive_murmur_str(&&ss: str) -> str {
+   let mm = naive_murmur(ss);
    ret #fmt("%016X%016X", mm[0u], mm[1u]);
 }
 
+
+
 // murmur3 x64 128-bit
-fn murmur(&&key_: str) -> [u64] {
+fn naive_murmur(&&key_: str) -> [u64] {
 
    let key = str::bytes (key_);
    //std::io::println("key: "  + vec2::show(key,  {|b| #fmt("%02X", b as uint)}));
@@ -37,6 +39,47 @@ fn murmur(&&key_: str) -> [u64] {
    fn rotl64 (x: u64, r: u64) -> u64 {
       ret (x << r) | (x >> (64u-r));
    }
+
+
+   // conversion from 8 to 64 bits
+   pure fn isEight (bytes: [u8]) -> bool {
+      ret vec::len(bytes) == 8u;
+   }
+
+   fn convert_eight_u8_to_one_u64 (bb: [u8]) -> u64 {
+      check isEight(bb);
+      let bb_ = vec::reversed(bb);  // apparently rust doesn't have the same
+                                    // endianness problem as C++ does
+      ret vec::foldl(0u64, bb_, {|w, b| (w << 8u) + (b as u64)});
+   }
+
+   fn convert_u8to64 (bb: [u8]) -> [u64] {
+      fn lesser <TT: copy> (aa: TT, bb: TT) -> TT {
+         if aa < bb { aa } else { bb }
+      }
+
+      // split into vector^2
+      fn splitEvery <TT: copy> (nn: uint, xs: [TT]) -> [[TT]] {
+         let ys: [[TT]] = [];
+
+         vec::iteri (xs, {|ii, _x|
+            let len = vec::len(xs);
+
+            if ii % nn == 0u && ii < len {
+               let y = vec::slice (xs, ii, lesser(nn+ii, len));
+               vec::push (ys, y);
+            }
+         });
+
+         ret ys;
+      }
+
+      let bbs = splitEvery(8u, bb);
+      ret vec::map ( bbs, {|xs|
+         convert_eight_u8_to_one_u64(xs)
+      });
+   }
+   
 
    // fmix
    fn fmix (k_: u64) -> u64 {
@@ -56,7 +99,7 @@ fn murmur(&&key_: str) -> [u64] {
    let nbytes  = vec::len(key);
    let nblocks = nbytes / 16u;
    let (body_, tail) = vec2::splitAt (nblocks*16u, key);
-   let body: [u64] = vec2::u8to64 (body_);
+   let body: [u64] = convert_u8to64 (body_);
 
 
    fn apply_constants (rot: u64, 
@@ -109,15 +152,19 @@ fn murmur(&&key_: str) -> [u64] {
       ret (h1, h2);
    }
 
+
+
    // tail
    fn do_tail (tail_: [u8], h1: u64, h2: u64, c1: u64, c2: u64) -> (u64,u64) { 
       let tail = tail_;
       vec::grow(tail, 16u - vec::len(tail), 0u8);
       assert vec::len(tail) == 16u;
-      let jj = tail;
-      let jj_ = vec2::u8to64 (jj);
-      let j1 = jj_[0u];
-      let j2 = jj_[1u];
+      //let jj = vec::reversed (tail);
+      let jj = tail; // don't need to flip...
+      let jj_ = convert_u8to64 (jj);
+      assert vec::len(jj_) == 2u;
+      let j1 = jj_[0u]; // reversing
+      let j2 = jj_[1u]; // reversing
 
 
       let h2_ = apply_constants (33u64, j2, h2, c2, c1);
@@ -151,7 +198,5 @@ fn murmur(&&key_: str) -> [u64] {
 
    ret [h1, h2];
 }
-
-
 
 

@@ -19,25 +19,20 @@ fn word_of_god () -> [str]
 // test its behavior
 fn hash_bench <TT> ( label: str, hashfn: fn(&&str)->TT, data: [str] )
 {
-   let t0 = std::time::get_time();
+   let t0 = std::time::precise_time_s();
    let _v = vec::map(data, hashfn);
-   let t1 = std::time::get_time();
+   let t1 = std::time::precise_time_s();
 
-   let (ds,du) = (t1.sec-t0.sec, t1.usec-t0.usec);
-
-   std::io::println(label + #fmt("%u sec %u usec", ds as uint, du as uint));
+   std::io::println(label + #fmt("%06.3f sec", t1 - t0));
 }
 
 
 // main
 fn main () {
-   std::io::println ("");
-
    let meow = word_of_god();
 
-   hash_bench ("Benching dummy_hash...  ", {|_x| "ABCD"},      meow);
-   hash_bench ("Benching djb...         ", murmur::djb,        meow);
-   hash_bench ("Benching murmur3...     ", murmur::murmur, meow);
+   hash_bench ("Benching djb...     ", murmur::djb,          meow);
+   hash_bench ("Benching murmur3... ", murmur::murmur,       meow);
 }
 
 
