@@ -16,9 +16,7 @@ fn word_of_god () -> [str]
        vec::map(str2::lines(bible_), {|ln| ln+ln+ln+ln});
 }
 
-// given a string hash function
-// (modified to provide a string return value)
-// test its behavior
+// given a string hash function, test its behavior
 fn hash_bench <TT> ( label: str, hashfn: fn(&&str)->TT, data: [str] )
 {
    let t0 = std::time::precise_time_s();
