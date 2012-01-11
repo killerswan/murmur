@@ -6,15 +6,6 @@
 use std;
 use vec2; // kcantu's rust-tools...
 
-fn djb(&&ss: str) -> uint 
-{
-   // default str::hash
-   // https://github.com/graydon/rust/blob/master/src/libcore/str.rs at ll. 43-50
-   let uu: uint = 5381u;
-   for cc: u8 in ss { uu *= 33u; uu += cc as uint; }
-   ret uu;
-}
-
 // rotation left
 fn rotl64 (x: u64, r: u64) -> u64 
 {

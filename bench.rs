@@ -3,6 +3,7 @@
 
 use std;
 use murmur;
+use djb;
 use str2;
 
 fn word_of_god () -> [str]
@@ -32,7 +33,7 @@ fn hash_bench <TT> ( label: str, hashfn: fn(&&str)->TT, data: [str] )
 fn main () {
    let meow = word_of_god();
 
-   hash_bench ("Benching djb...     ", murmur::djb,          meow);
+   hash_bench ("Benching djb...     ", djb::djb,          meow);
    hash_bench ("Benching murmur3... ", murmur::murmur,       meow);
 }
 
