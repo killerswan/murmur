@@ -1,7 +1,7 @@
 // Kevin Cantu
 // replace djb with murmur
 
-#[link(name = "murmur", author = "kcantu", vers = "0.1")];
+#[link(name = "murmur", author = "kcantu", vers = "0.2")];
 
 use std;
 use vec2; // kcantu's rust-tools...
@@ -142,7 +142,8 @@ fn finalize (h1_: u64, h2_: u64, len: uint) -> (u64,u64)
 }
 
 // murmur3 x64 128-bit
-fn murmur(&&key_: str) -> [u64] 
+// truncated
+fn murmur(&&key_: str) -> u64
 {
 
    let key = str::bytes (key_);
@@ -166,15 +167,15 @@ fn murmur(&&key_: str) -> [u64]
    let (h1, h2) = do_tail (tail, h1, h2, c1, c2);
    let (h1, h2) = finalize (h1, h2, nbytes);
 
-   ret [h1, h2];
+   ret h1;
 }
 
 
 // translate to hex
 fn murmur_str(&&ss: str) -> str 
 {
-   let mm = murmur(ss);
-   ret #fmt("%016X%016X", mm[0u], mm[1u]);
+   let m0 = murmur(ss);
+   ret #fmt("%016X", m0);
 }
 
 
