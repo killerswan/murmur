@@ -1,4 +1,4 @@
-LEVEL=0
+LEVEL=3
 
    rustc --opt-level $LEVEL -L ./djb --lib ./djb/djb.rs \
 && rustc --opt-level $LEVEL -L ../rust-tools --lib ../rust-tools/str2.rs \

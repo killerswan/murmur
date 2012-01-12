@@ -80,18 +80,43 @@ fn do_body (blocks: [u64],
 }
 
 // tail
-fn do_tail (tail_: [u8], h1: u64, h2: u64, c1: u64, c2: u64) -> (u64,u64) { 
-   let tail = tail_;
-   vec::grow(tail, 16u - vec::len(tail), 0u8);
+fn do_tail (tail: [u8], h1: u64, h2: u64, c1: u64, c2: u64) -> (u64,u64) { 
+   let len = vec::len(tail);
+
+/*
+   vec::grow(tail, 16u - len, 0u8);
    assert vec::len(tail) == 16u;
-   let jj = tail;
-   let jj_ = vec2::u8to64 (jj);
-   let j1 = jj_[0u];
-   let j2 = jj_[1u];
+   let kk = vec2::u8to64 (tail);
+   let k1 = kk[0u];
+   let k2 = kk[1u];
+*/
 
+   let k1 = 0u64;
+   let k2 = 0u64;
 
-   let h2_ = apply_constants (33u64, j2, h2, c2, c1);
-   let h1_ = apply_constants (31u64, j1, h1, c1, c2);
+   fn if_ (b: bool, f: block()) {
+      if b { f() }
+      else { () }
+   }
+
+      if_ (15u <= len, {|| k2 ^= (tail[14u] as u64) << 48u});
+      if_ (14u <= len, {|| k2 ^= (tail[13u] as u64) << 40u});
+      if_ (13u <= len, {|| k2 ^= (tail[12u] as u64) << 32u});
+      if_ (12u <= len, {|| k2 ^= (tail[11u] as u64) << 24u});
+      if_ (11u <= len, {|| k2 ^= (tail[10u] as u64) << 16u});
+      if_ (10u <= len, {|| k2 ^= (tail[ 9u] as u64) <<  8u});
+      if_ ( 9u <= len, {|| k2 ^= (tail[ 8u] as u64) <<  0u});
+      if_ ( 8u <= len, {|| k1 ^= (tail[ 7u] as u64) << 56u});
+      if_ ( 7u <= len, {|| k1 ^= (tail[ 6u] as u64) << 48u});
+      if_ ( 6u <= len, {|| k1 ^= (tail[ 5u] as u64) << 40u});
+      if_ ( 5u <= len, {|| k1 ^= (tail[ 4u] as u64) << 32u});
+      if_ ( 4u <= len, {|| k1 ^= (tail[ 3u] as u64) << 24u});
+      if_ ( 3u <= len, {|| k1 ^= (tail[ 2u] as u64) << 16u});
+      if_ ( 2u <= len, {|| k1 ^= (tail[ 1u] as u64) <<  8u});
+      if_ ( 1u <= len, {|| k1 ^= (tail[ 0u] as u64) <<  0u});
+
+   let h2_ = apply_constants (33u64, k2, h2, c2, c1);
+   let h1_ = apply_constants (31u64, k1, h1, c1, c2);
    ret (h1_,h2_);
 }
 
