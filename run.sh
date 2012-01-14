@@ -2,9 +2,7 @@
 
 LEVEL=0
 
-rm ./djb/*.so
-rm ../rust-tools/*.so
-rm *.so
+rm ../rust-tools/*.so *.so
 
    rustc --opt-level $LEVEL -L . --lib ./djb.rs \
 && rustc --opt-level $LEVEL -L ../rust-tools --lib ../rust-tools/str2.rs \
