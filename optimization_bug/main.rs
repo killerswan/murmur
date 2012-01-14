@@ -2,6 +2,7 @@
 // hash function testing
 
 use std;
+use bench;
 
 fn splitfn(ss: str, sepf: block(cc: char)->bool) -> [str]
 {
@@ -51,31 +52,5 @@ fn main ()
    let meow = word_of_god();
    hash_bench ("calling hash_bench()...   ", djb, meow);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// when BOTH of the following functions are compiled at opt level 1 instead of 0
-// the program becomes SLOWER with optimization
-fn word_of_god () -> [str]
-{
-   std::io::println ("Loading the lolcat bible...");
-   let path = "../lolcat/LOLCatBible_2012-01-04.xml";
-   let bible = std::io::read_whole_file (path);
-   let bible_ = str::unsafe_from_bytes (result::get (bible));
-
-   ret words(bible_) +
-       vec::map(lines(bible_), {|ln| ln+ln+ln+ln});
-}
-
-fn hash_bench <TT> ( label: str, hashfn: native fn(&&str)->TT, data: [str] )
-{
-   let t0 = std::time::precise_time_s();
-   let _v = vec::map(data, hashfn);
-   let t1 = std::time::precise_time_s();
-
-   std::io::println(label + #fmt("%06.3f sec", t1 - t0));
-}
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 
