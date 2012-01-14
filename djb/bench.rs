@@ -17,7 +17,7 @@ fn word_of_god () -> [str]
        vec::map(str2::lines(bible_), {|ln| ln+ln+ln+ln});
 }
 
-fn hash_bench <TT> ( label: str, hashfn: fn(&&str)->TT, data: [str] )
+fn hash_bench <TT> ( label: str, hashfn: native fn(&&str)->TT, data: [str] )
 {
    let t0 = std::time::precise_time_s();
    let _v = vec::map(data, hashfn);
