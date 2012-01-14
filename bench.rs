@@ -18,7 +18,7 @@ fn word_of_god () -> [str]
 }
 
 // given a string hash function, test its behavior
-fn hash_bench <TT> ( label: str, hashfn: fn(&&str)->TT, data: [str] )
+fn hash_bench <TT> ( label: str, hashfn: native fn(&&str)->TT, data: [str] )
 {
    let t0 = std::time::precise_time_s();
    let _v = vec::map(data, hashfn);
