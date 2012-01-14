@@ -6,6 +6,8 @@
 use std;
 use str2;
 
+// when BOTH of the following functions are compiled at opt level 1 instead of 0
+// the program becomes SLOWER with optimization
 fn word_of_god () -> [str]
 {
    std::io::println ("Loading the lolcat bible...");
@@ -15,6 +17,15 @@ fn word_of_god () -> [str]
 
    ret str2::words(bible_) +
        vec::map(str2::lines(bible_), {|ln| ln+ln+ln+ln});
+}
+
+fn hash_bench <TT> ( label: str, hashfn: native fn(&&str)->TT, data: [str] )
+{
+   let t0 = std::time::precise_time_s();
+   let _v = vec::map(data, hashfn);
+   let t1 = std::time::precise_time_s();
+
+   std::io::println(label + #fmt("%06.3f sec", t1 - t0));
 }
 
 
