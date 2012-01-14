@@ -1,8 +1,9 @@
 // Kevin Cantu
 // hash function testing
 
+#[link(name = "bench", author = "kcantu", vers = "0.0")];
+
 use std;
-use djb;
 use str2;
 
 fn word_of_god () -> [str]
@@ -23,13 +24,6 @@ fn hash_bench <TT> ( label: str, hashfn: fn(&&str)->TT, data: [str] )
    let t1 = std::time::precise_time_s();
 
    std::io::println(label + #fmt("%06.3f sec", t1 - t0));
-}
-
-// main
-fn main () {
-   let meow = word_of_god();
-
-   hash_bench ("Benching djb...     ", djb::djb,          meow);
 }
 
 

@@ -1,10 +1,10 @@
 // Kevin Cantu
 // replace djb with murmur
 
-#[link(name = "murmur", author = "kcantu", vers = "0.2")];
+#[link(name = "murmur", author = "kcantu", vers = "0.1")];
 
 use std;
-use vec2; // kcantu's rust-tools...
+use vec2;
 
 // rotation left
 fn rotl64 (x: u64, r: u64) -> u64 
@@ -25,7 +25,6 @@ fn fmix (k_: u64) -> u64
 
    ret kk;
 }
-
 
 fn apply_constants (rot: u64, 
                     kk: u64,
@@ -83,14 +82,6 @@ fn do_body (blocks: [u64],
 fn do_tail (tail: [u8], h1: u64, h2: u64, c1: u64, c2: u64) -> (u64,u64) { 
    let len = vec::len(tail);
 
-/*
-   vec::grow(tail, 16u - len, 0u8);
-   assert vec::len(tail) == 16u;
-   let kk = vec2::u8to64 (tail);
-   let k1 = kk[0u];
-   let k2 = kk[1u];
-*/
-
    let k1 = 0u64;
    let k2 = 0u64;
 
@@ -142,8 +133,7 @@ fn finalize (h1_: u64, h2_: u64, len: uint) -> (u64,u64)
 }
 
 // murmur3 x64 128-bit
-// truncated
-fn murmur(&&key_: str) -> u64
+fn murmur(&&key_: str) -> [u64] 
 {
 
    let key = str::bytes (key_);
@@ -167,15 +157,15 @@ fn murmur(&&key_: str) -> u64
    let (h1, h2) = do_tail (tail, h1, h2, c1, c2);
    let (h1, h2) = finalize (h1, h2, nbytes);
 
-   ret h1;
+   ret [h1, h2];
 }
 
 
 // translate to hex
 fn murmur_str(&&ss: str) -> str 
 {
-   let m0 = murmur(ss);
-   ret #fmt("%016X", m0);
+   let mm = murmur(ss);
+   ret #fmt("%016X%016X", mm[0u], mm[1u]);
 }
 
 
