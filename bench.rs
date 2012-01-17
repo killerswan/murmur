@@ -4,7 +4,6 @@
 use std;
 use murmur;
 use djb;
-use str2;
 
 fn word_of_god () -> [str]
 {
@@ -13,8 +12,8 @@ fn word_of_god () -> [str]
    let bible = std::io::read_whole_file (path);
    let bible_ = str::unsafe_from_bytes (result::get (bible));
 
-   ret str2::words(bible_) +
-       vec::map(str2::lines(bible_), {|ln| ln+ln+ln+ln});
+   ret str::words(bible_) +
+       vec::map(str::lines(bible_), {|ln| ln+ln+ln+ln});
 }
 
 // given a string hash function, test its behavior
