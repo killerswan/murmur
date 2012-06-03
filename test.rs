@@ -16,8 +16,8 @@ fn hash_test ( test_label: str,
                 path: str
               ) {
 
-   let res = std::io::read_whole_file (path);
-   let data = str::unsafe_from_bytes (result::get (res));
+   let res = io::read_whole_file (path);
+   let data = str::from_bytes (result::get (res));
    let lines = str::split_str (data, "\n");
 
 
@@ -35,12 +35,12 @@ fn hash_test ( test_label: str,
                 );
 
 
-   let pairsFailed = 0u;
-   let pairsTotal = 0u;
+   let mut pairsFailed = 0u;
+   let mut pairsTotal = 0u;
 
-   std::io::println (test_label);
+   io::println (test_label);
 
-   vec::map (keyVal, block (ab: (str,str)) -> () {
+   vec::map (keyVal, fn&(ab: (str,str)) -> () {
 
       let (key,val) = ab;
       let val_ = wrapped_hash(key);
@@ -50,17 +50,17 @@ fn hash_test ( test_label: str,
       if val != val_ {
          pairsFailed += 1u;
 
-         std::io::println (#fmt("For \"%s\" -> ",  key ));
-         std::io::println (#fmt("   expected: 0x%s", val ));
-         std::io::println (#fmt("   not:      0x%s", val_));
+         io::println (#fmt("For \"%s\" -> ",  key ));
+         io::println (#fmt("   expected: 0x%s", val ));
+         io::println (#fmt("   not:      0x%s", val_));
       }
    });
 
    if pairsFailed > 0u {
-      std::io::println ( #fmt(
+      io::println ( #fmt(
          "%u/%u pairs failed\n", pairsFailed, pairsTotal));
    } else {
-      std::io::println ( #fmt(
+      io::println ( #fmt(
          "%u pairs OK\n", pairsTotal));
       
    }
