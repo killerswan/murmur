@@ -40,6 +40,7 @@ fn apply_constants(rot: u64,
 }
 
 // crunch body data
+#[inline(always)]
 fn do_body(blocks: [u64],
            nblocks: uint,
            h1_: u64,
@@ -129,7 +130,7 @@ fn finalize(h1_: u64, h2_: u64, len: uint) -> (u64,u64)
 // I suspect this flips the endianness from the C/C++ equivalent
 fn to_u64(bb: [u8]) -> ([u64], [u8]) unsafe {
    let len = vec::len(bb);
-   let head_len = len / 8u;
+   let head_len = (len / 8u) * 8u;
 
    let mut head = vec::slice(bb, 0u, head_len);
    let mut tail = vec::slice(bb, head_len, len);
@@ -139,6 +140,13 @@ fn to_u64(bb: [u8]) -> ([u64], [u8]) unsafe {
    vec::unsafe::set_len(vv, vec::len(bb) / 8u);
 
    ret (vv, tail);
+}
+
+#[test]
+fn TEST_0_to_u64() {
+   let (xx, yy) = to_u64([1u8,2u8,3u8,4u8,5u8,6u8,7u8,8u8,9u8,10u8]);
+   assert [0x08070605_04030201_u64] == xx;
+   assert [9u8, 10u8] == yy;
 }
 
 // murmur3 x64 128-bit
