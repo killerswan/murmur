@@ -6,12 +6,14 @@
 use std;
 
 // rotation left
+#[inline(always)]
 fn rotl64(x: u64, r: u64) -> u64 
 {
    ret (x << r) | (x >> (64u-r));
 }
 
 // fmix
+#[inline(always)]
 fn fmix(k_: u64) -> u64 
 {
    let mut kk = k_;
@@ -25,6 +27,7 @@ fn fmix(k_: u64) -> u64
    ret kk;
 }
 
+#[inline(always)]
 fn apply_constants(rot: u64, 
                    kk: u64,
                    h: u64, 
@@ -53,8 +56,6 @@ fn do_body(blocks: [u64],
 
    let mut ii = 0u;
 
-   //std::io::println(#fmt("nblocks: %u", nblocks));
-
    while ii < nblocks
    {
       let k1 = blocks[ii*2u + 0u];
@@ -79,6 +80,7 @@ fn do_body(blocks: [u64],
 }
 
 // tail
+#[inline(always)]
 fn do_tail(tail: [u8], h1: u64, h2: u64, c1: u64, c2: u64) -> (u64,u64) { 
    let len = vec::len(tail);
 
@@ -107,6 +109,7 @@ fn do_tail(tail: [u8], h1: u64, h2: u64, c1: u64, c2: u64) -> (u64,u64) {
 }
 
 // finalization
+#[inline(always)]
 fn finalize(h1_: u64, h2_: u64, len: uint) -> (u64,u64) 
 {
    let mut h1 = h1_;
@@ -127,7 +130,7 @@ fn finalize(h1_: u64, h2_: u64, len: uint) -> (u64,u64)
    ret (h1, h2);
 }
 
-// I suspect this flips the endianness from the C/C++ equivalent
+#[inline(always)]
 fn to_u64(bb: [u8]) -> ([u64], [u8]) unsafe {
    let len = vec::len(bb);
    let head_len = (len / 8u) * 8u;
@@ -142,19 +145,9 @@ fn to_u64(bb: [u8]) -> ([u64], [u8]) unsafe {
    ret (vv, tail);
 }
 
-#[test]
-fn TEST_0_to_u64() {
-   let (xx, yy) = to_u64([1u8,2u8,3u8,4u8,5u8,6u8,7u8,8u8,9u8,10u8]);
-   assert [0x08070605_04030201_u64] == xx;
-   assert [9u8, 10u8] == yy;
-}
-
 // murmur3 x64 128-bit
-fn murmur(&&key_: str) -> [u64] 
+fn murmur_u8(&&key: [u8]) -> [u64] 
 {
-
-   let key = str::bytes(key_);
-
    // TODO: random seeds
    let seed = 0u64;
    let mut h1 = seed;
@@ -177,6 +170,12 @@ fn murmur(&&key_: str) -> [u64]
    ret [h1, h2];
 }
 
+fn murmur(&&key_: str) -> [u64] 
+{
+   let key = str::bytes(key_);
+   ret murmur_u8(key);
+}
+
 // translate to hex
 fn murmur_str(&&ss: str) -> str 
 {
@@ -189,4 +188,17 @@ fn murmur_chopped(&&ss: str) -> u64
    ret murmur(ss)[0];
 }
 
+#[test]
+fn test_to_u64() {
+   let (xx, yy) = to_u64([1u8,2u8,3u8,4u8,5u8,6u8,7u8,8u8,9u8,10u8]);
+   assert [0x08070605_04030201_u64] == xx;
+   assert [9u8, 10u8] == yy;
+}
+
+#[test]
+fn reference_murmur3_test() {
+   let key = "The quick brown fox jumps over the lazy dog.";
+   let reference_value = "CD99481F9EE902C9695DA1A38987B6E7";
+   assert reference_value == murmur_str(key);
+}
 
